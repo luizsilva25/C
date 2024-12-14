@@ -3,7 +3,6 @@
 #include <string.h>
 
 char *get_data(void);
-int data_slice(data_s);
 
 int main (void)
 {
@@ -14,7 +13,54 @@ int main (void)
         return 1;
     }
 
-    int speed, height, temperature, time = data_slice(data);
+    int speed, height, temperature, time;
+
+    // DATA SLICING
+    char *user_data = data;
+    const char *delim = " ";
+
+    speed = atoi(strtok(user_data, delim));
+    height = atoi(strtok(NULL, delim));
+    temperature = atoi(strtok(NULL, delim));
+    time = atoi(strtok(NULL, delim));
+
+    int energy = speed * 10;
+    
+    // AJUSTES COM BASE EM ALTITUDE
+    if (height > 5000)
+    {
+        energy = energy + ((energy*20)/100);
+    }
+    
+    if (height < 1000)
+    {
+        energy = energy - ((energy*10)/100);    
+    }
+
+    // AJUSTES COM BASE EM TEMPERATURA EXTERNA
+    if (temperature > 40 || temperature < -10)
+    {
+        energy = energy - ((energy*30)/100);
+    }
+
+    // EFEITO DO TEMPO DE VOO
+    if (time > 120)
+    {
+        printf("Erro: tempo de voo excedido ou dados invalidos.");
+        return 2;
+    }
+
+    if (time > 60)
+    {
+        int tempo_excedente = time - 60;
+        for (tempo_excedente; tempo_excedente >= 30; tempo_excedente = tempo_excedente - 30)
+        {
+            energy = energy + ((energy*10)/100);
+        }
+    }
+
+    // OUTPUT
+    printf("A energia necessaria para o voo eh: %i joules", energy);
 
     return 0;
 
@@ -30,19 +76,4 @@ char *get_data()
     while ((ch = getchar()) != '\n' && ch != EOF);
 
     return user_input; 
-}
-
-int data_slice(data_s)
-{
-    int speed_s, height_s, temperature_s, time_s;
-    char *user_data = data_s;
-    const char *delim = " ";
-
-    speed_s = atoi(strtok(user_data, delim));
-    height_s = atoi(strtok(NULL, delim));
-    temperature_s = atoi(strtok(NULL, delim));
-    time_s = atoi(strtok(NULL, delim));
-
-    printf("%i, %i, %i, %i.\n", speed_s, height_s, temperature_s, time_s);
-    return speed_s, height_s, temperature_s, time_s;
 }
